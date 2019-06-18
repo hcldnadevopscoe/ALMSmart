@@ -1,0 +1,95 @@
+node('master') { 
+
+	node {
+  		def mvnHome = tool 'Maven 3.3.9'
+	    env.PATH = "${mvnHome}/bin:${env.JAVA_HOME}/bin:${env.PATH}"
+  
+    
+        stage('ABP Code Checkout') {
+           
+               echo 'Checking out code...'
+            
+                
+
+               checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'GIT-Anusha', url: 'https://repo.hclets.com/HCLDevOpsCOE/ALMSmart.git']]])
+               
+        }
+        
+         stage('ABP Build & Unit Test') {
+            
+                echo 'Building ..'
+ 		        sh returnStdout: true, script: '''cd Presto
+		        mvn clean install -DskipTests'''
+
+        }
+        
+         stage('ABP Code Quality Analysis') {
+            
+                echo 'Analysing code...'
+                sh returnStdout: true, script: '''cd Presto
+                mvn -B -V -U -e sonar:sonar -Dsonar.host.url=\'http://35.162.119.3/sonar\''''
+            
+        }
+        
+        stage ('SCM Comparision') {
+            echo 'SCM  Comparision'
+            sh '''cd /usr/jenkins_new/workspace/SCM/SCMComparison
+            ./scm_comparison.sh ABPBanking Development Dev Presto-2 Presto2 ${WORKSPACE}/Presto/src/main/resources/databaseproperties.xml
+            '''
+        }
+
+
+        stage ('ABP Manage Artifacts ') {
+        def server
+        def buildInfo
+        def rtMaven
+        server = Artifactory.newServer url: 'http://35.162.119.3/artifactory', username: 'admin', password: 'MAPI@HCLT'
+
+        rtMaven = Artifactory.newMavenBuild()
+        rtMaven.tool = 'Maven 3.3.9'
+        
+        
+    
+
+   
+   
+       buildInfo = rtMaven.run pom: 'Presto/pom.xml', goals: 'install', buildInfo: buildInfo
+    
+       sh '''cd  /usr/jenkins_new/workspace/AlmSmart_Continuous_Integration@2/Presto/target/
+mv Presto.war Presto-0.0.1-$(date +%Y%m%d.%H%M%S)-1.war'''
+   
+        
+def uploadSpec = """{
+
+  "files": [
+
+    {
+
+      "pattern": "**/*.war",
+
+      "target": "releases/core/Presto/0.0.1-SNAPSHOT/"
+
+    }
+
+ ]
+
+}"""
+
+server.upload(uploadSpec)
+
+server.upload spec: uploadSpec
+
+ 
+
+    
+} 
+stage ('Send Email') {
+	echo 'Sending email...'
+	mail to:"anusha.sn@hcl.com, mohan.nakkella@hcl.com, Anantha.Naidu@hcl.com, Atul-Kumar@hcl.com, deepakpandhari.y@hcl.com, sharma_ga@hcl.com, narayanan.ko@hcl.com, shreyas.joshi@hcl.com, sreehari.s@hcl.com, Sripathi.ks@hcl.com, Vinay.Vsharma@hcl.com" , subject: "${JOB_NAME} - Build # ${BUILD_NUMBER} - ${currentBuild.currentResult} !" , body: "${JOB_NAME} - Build # ${BUILD_NUMBER} - ${currentBuild.currentResult} : Check console output at ${BUILD_URL} to view the results." , sendToIndividuals: true 
+}
+       
+          
+ }
+ 
+
+	}

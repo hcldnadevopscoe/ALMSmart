@@ -1,0 +1,88 @@
+node('master') { 
+
+	node {
+  		def mvnHome = tool 'Maven 3.3.9'
+	    env.PATH = "${mvnHome}/bin:${env.JAVA_HOME}/bin:${env.PATH}"
+  
+    
+        stage('ABP  Code Checkout') {
+           
+               echo 'Checking out code...'
+            
+
+
+               checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'GIT-2', url: 'https://repo.hclets.com/veena.m/Presto.git']]])
+               
+        }
+        
+         stage('ABP Build & Unit Test') {
+            
+                echo 'Building ..'
+ 		        sh returnStdout: true, script: '''cd Presto
+		        mvn clean install -DskipTests'''
+
+        }
+        
+         stage('ABP Code Quality Analysis') {
+            
+                echo 'Analysing code...'
+                sh returnStdout: true, script: '''cd Presto
+                mvn -B -V -U -e sonar:sonar -Dsonar.host.url=\'http://35.162.119.3/sonar\''''
+            
+        }
+
+        
+        stage ('ABP Manage Artifacts ') {
+        def server
+        def buildInfo
+        def rtMaven
+        server = Artifactory.newServer url: 'http://35.162.119.3/artifactory', username: 'admin', password: 'MAPI@HCLT'
+
+        rtMaven = Artifactory.newMavenBuild()
+        rtMaven.tool = 'Maven 3.3.9'
+        
+        
+    
+
+   
+   
+       buildInfo = rtMaven.run pom: 'Presto/pom.xml', goals: 'install', buildInfo: buildInfo
+    
+       sh '''cd  /var/lib/jenkins/workspace/ABP_PipelineAsCode_Artifactory@2/Presto/target/
+mv Presto.war Presto-0.0.1-$(date +%Y%m%d.%H%M%S)-1.war'''
+   
+        
+def uploadSpec = """{
+
+  "files": [
+
+    {
+
+      "pattern": "**/*.war",
+
+      "target": "releases/core/Presto/0.0.1-SNAPSHOT/"
+
+    }
+
+ ]
+
+}"""
+
+server.upload(uploadSpec)
+
+buildInfo = Artifactory.newBuildInfo()
+
+server.upload spec: uploadSpec, buildInfo: buildInfo
+server.publishBuildInfo buildInfo 
+ 
+
+    
+} 
+       
+          
+             }
+	}
+
+    
+
+   

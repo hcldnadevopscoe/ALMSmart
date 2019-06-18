@@ -1,0 +1,62 @@
+node('master') {    
+                node {
+                                def mvnHome = tool 'Maven 3.3.9'
+                    env.PATH = "${mvnHome}/bin:${env.JAVA_HOME}/bin:${env.PATH}"
+                    
+                   
+
+        stage('GenRocket TestData generation') {
+           
+               echo 'Generating TestData for Fucntional & Non-Functional Testing...'
+               sh '/opt/genrocket/genScript.sh'
+               
+        }
+        
+        stage('Functional Testing') {
+            
+                echo 'Functional Testing with Selenium ..'
+                
+ 		      build job: 'ABP_Functional_Test_AlmSmart'
+		}
+		stage('Performance testing'){
+		
+			echo ' Performance testing using yslow '
+			sh '/usr/jenkins_new/workspace/phantonjs.sh'
+			
+
+		
+		}
+                                
+            stage('Load Testing') {
+                                        
+                 echo ' JMeter load Testing'
+                 sh '/opt/jmeter/apache-jmeter-3.3/bin/jmeter.sh -Jjmeter.save.saveservice.output_format=xml -n -t /usr/jenkins_new/workspace/AlmSmart_Continuous_Integration@2/Presto/Jmeter_Test_scripts/Presto_Add_Employee.jmx -l /usr/jenkins_new/workspace/Presto_Employee.jtl'
+          
+                 echo ' Publish load Result report'
+                 perfReport failBuildIfNoResultFile: false, modePerformancePerTestCase: true, sourceDataFiles: '/usr/jenkins_new/workspace/Presto_Employee.jtl'
+
+                                                                
+                                
+                                }
+                                
+                      stage('ABP JIRA Integration') {
+                                
+                                echo 'Update JIRA Issues'
+                                
+                                step([$class: 'hudson.plugins.jira.JiraIssueUpdater', 
+    issueSelector: [$class: 'hudson.plugins.jira.selector.DefaultIssueSelector'], 
+    scm: [$class: 'GitSCM', branches: [[name: '*/master']], 
+        userRemoteConfigs: [[url: 'https://repo.hclets.com/HCLDevOpsCOE/ALMSmart.git']]]]) 
+                                
+                                jiraComment body: 'Build-Status: http://almsmart-jenkins.demos.hclets.com/job/AlmSmart_Continuous_Testing \\\\ SourceCode-Repo: https://repo.hclets.com/HCLDevOpsCOE/ALMSmart.git \\\\ Artifact Repo: http://almsmart.demos.hclets.com/artifactory/webapp/#/builds/AlmSmart_Continuous_Integration \\\\  Code Quality : http://almsmart.demos.hclets.com/sonar/dashboard/index/core:Presto \\\\  Functional Test Results : http://almsmart-jenkins.demos.hclets.com/job/ABP_Functional_Test_AlmSmart/testngreports/  \\\\ Load Test Results : http://almsmart-jenkins.demos.hclets.com/job/AlmSmart_Continuous_Testing/performance/  \\\\ Performance Test Results : http://almsmart-jenkins.demos.hclets.com/job/AlmSmart_Continuous_Testing/', issueKey: 'ABP-148'
+                                
+                                }
+								stage ('Send Email') {
+	echo 'Sending email...'
+	mail to:"anusha.sn@hcl.com, mohan.nakkella@hcl.com, Anantha.Naidu@hcl.com, Atul-Kumar@hcl.com, deepakpandhari.y@hcl.com, sharma_ga@hcl.com, narayanan.ko@hcl.com, shreyas.joshi@hcl.com, sreehari.s@hcl.com, Sripathi.ks@hcl.com, Vinay.Vsharma@hcl.com" , subject: "${JOB_NAME} - Build # ${BUILD_NUMBER} - ${currentBuild.currentResult} !" , body: "${JOB_NAME} - Build # ${BUILD_NUMBER} - ${currentBuild.currentResult} : Check console output at ${BUILD_URL} to view the results." , sendToIndividuals: true 
+}
+                                
+                }
+                                
+}
+         

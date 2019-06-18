@@ -1,0 +1,35 @@
+node('master') {    
+	node {
+  		def mvnHome = tool 'Maven 3.3.9'
+	    env.PATH = "${mvnHome}/bin:${env.JAVA_HOME}/bin:${env.PATH}"
+
+        stage('Code Checkout') {
+           
+               echo 'Checking out code...'
+               checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'GIT-2', url: 'https://repo.hclets.com/veena.m/Presto.git']]])
+               
+        }
+        
+         stage('Build & Unit Test') {
+            
+                echo 'Building ..'
+ 		        sh returnStdout: true, script: '''cd Presto
+		        mvn clean install -DskipTests'''
+
+        }
+         stage('Code Analysis') {
+            
+                echo 'Analysing code...'
+                sh returnStdout: true, script: '''cd Presto
+                mvn -B -V -U -e sonar:sonar -Dsonar.host.url=\'http://35.162.119.3/sonar\''''
+            
+        }
+        
+        
+        stage('Nexus Artifacts upload') {
+            
+                echo 'Uploading artifacts to nexus..'
+                nexusArtifactUploader artifactId: 'Presto', credentialsId: 'nexus-1', file: 'Presto/target/Presto.war', groupId: 'core', nexusPassword: '', nexusUrl: 'nexus55.demos.hclets.com/nexus', nexusUser: '', packaging: 'war', protocol: 'http', repository: 'releases', version: '$BUILD_ID'
+             }
+	}
+}

@@ -1,0 +1,23 @@
+<globalVariables>
+  <globalVariable>
+  	<name>connection.driver_class</name>
+  	<value>com.mysql.jdbc.Driver</value>
+  </globalVariable>
+  <globalVariable>
+  	<name>connection.url</name>
+  	<value>jdbc:mysql://localhost:3306/banking</value>
+  </globalVariable>
+  <globalVariable>
+  	<name>connection.username</name>
+  	<value>root</value>
+  </globalVariable>
+  <globalVariable>
+  	<name>connection.password</name>
+  	<value>MAPI@HCLT</value>
+  </globalVariable>
+  <globalVariable>
+  	<name>dialect</name>
+  	<value>org.hibernate.dialect.MySQLDialect</value>
+  </globalVariable>
+</globalVariables>
+

@@ -1,0 +1,34 @@
+<rows>
+  <row>
+    <Bank_Employee_ID>356285</Bank_Employee_ID>
+    <BranchName>Branch-One</BranchName>
+    <RoleName>Probationary Officer</RoleName>
+    <firstName>Zelma</firstName>
+    <MiddleName>K</MiddleName>
+    <lastName>Lao</lastName>
+    <Gender>M</Gender>
+    <BirthDate>25-10-1991</BirthDate>
+    <phoneNo>685-3985</phoneNo>
+    <MobileNo>9961709784</MobileNo>
+    <email>3562851@ourbank.com</email>
+    <addressLine1>House.No.7-24, Maulana Abul Kalam Azad</addressLine1>
+    <City>Bhubaneswar</City>
+    <State>Odisha</State>
+  </row>
+  <row>
+    <Bank_Employee_ID>356347</Bank_Employee_ID>
+    <BranchName>Branch-Four</BranchName>
+    <RoleName>Probationary Officer</RoleName>
+    <firstName>Lacie</firstName>
+    <MiddleName>N</MiddleName>
+    <lastName>Cardinal</lastName>
+    <Gender>M</Gender>
+    <BirthDate>04-05-2004</BirthDate>
+    <phoneNo>188-8588</phoneNo>
+    <MobileNo>9552979346</MobileNo>
+    <email>3563471@ourbank.com</email>
+    <addressLine1>House.No.7-27, S. Radhakrishnan</addressLine1>
+    <City>Kavaratti</City>
+    <State>Lakshadweep</State>
+  </row>
+  </rows>
