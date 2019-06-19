@@ -11,7 +11,7 @@ node('master') {
             
                 
 
-               checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'GIT-Anusha', url: 'https://repo.hclets.com/HCLDevOpsCOE/ALMSmart.git']]])
+               checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'mohanprivategit', url: 'https://github.com/hcldnadevopscoe/ALMSmart.git']]])
                
         }
         
@@ -23,13 +23,13 @@ node('master') {
 
         }
         
-         stage('ABP Code Quality Analysis') {
+      //   stage('ABP Code Quality Analysis') {
             
-                echo 'Analysing code...'
-                sh returnStdout: true, script: '''cd Presto
-                mvn -B -V -U -e sonar:sonar -Dsonar.host.url=\'http://35.162.119.3/sonar\''''
+       //         echo 'Analysing code...'
+       //         sh returnStdout: true, script: '''cd Presto
+       //         mvn -B -V -U -e sonar:sonar -Dsonar.host.url=\'http://35.162.119.3/sonar\''''
             
-        }
+      //  }
         
         stage ('SCM Comparision') {
             echo 'SCM  Comparision'
@@ -55,7 +55,7 @@ node('master') {
    
        buildInfo = rtMaven.run pom: 'Presto/pom.xml', goals: 'install', buildInfo: buildInfo
     
-       sh '''cd  /usr/jenkins_new/workspace/AlmSmart_Continuous_Integration@2/Presto/target/
+       sh '''cd  /usr/jenkins_new/workspace/ALMsmart_CI@2/Presto/target/
 mv Presto.war Presto-0.0.1-$(date +%Y%m%d.%H%M%S)-1.war'''
    
         
@@ -85,7 +85,7 @@ server.upload spec: uploadSpec
 } 
 stage ('Send Email') {
 	echo 'Sending email...'
-	mail to:"anusha.sn@hcl.com, mohan.nakkella@hcl.com, Anantha.Naidu@hcl.com, Atul-Kumar@hcl.com, deepakpandhari.y@hcl.com, sharma_ga@hcl.com, narayanan.ko@hcl.com, shreyas.joshi@hcl.com, sreehari.s@hcl.com, Sripathi.ks@hcl.com, Vinay.Vsharma@hcl.com" , subject: "${JOB_NAME} - Build # ${BUILD_NUMBER} - ${currentBuild.currentResult} !" , body: "${JOB_NAME} - Build # ${BUILD_NUMBER} - ${currentBuild.currentResult} : Check console output at ${BUILD_URL} to view the results." , sendToIndividuals: true 
+	mail to:"mohan.nakkella@hcl.com, Anantha.Naidu@hcl.com, Atul-Kumar@hcl.com, deepakpandhari.y@hcl.com, sharma_ga@hcl.com, narayanan.ko@hcl.com, shreyas.joshi@hcl.com, Sripathi.ks@hcl.com" , subject: "${JOB_NAME} - Build # ${BUILD_NUMBER} - ${currentBuild.currentResult} !" , body: "${JOB_NAME} - Build # ${BUILD_NUMBER} - ${currentBuild.currentResult} : Check console output at ${BUILD_URL} to view the results." , sendToIndividuals: true 
 }
        
           
