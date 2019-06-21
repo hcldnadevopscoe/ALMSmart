@@ -23,13 +23,13 @@ node('master') {
 
         }
         
-      //   stage('ABP Code Quality Analysis') {
+         stage('ABP Code Quality Analysis') {
             
-       //         echo 'Analysing code...'
-       //         sh returnStdout: true, script: '''cd Presto
-       //         mvn -B -V -U -e sonar:sonar -Dsonar.host.url=\'http://35.162.119.3/sonar\''''
+                echo 'Analysing code...'
+                sh returnStdout: true, script: '''cd Presto
+                mvn -B -V -U -e sonar:sonar -Dsonar.login=admin -Dsonar.password=admin -Dsonar.host.url=\'http://35.162.119.3/sonar\''''
             
-      //  }
+        }
         
         stage ('SCM Comparision') {
             echo 'SCM  Comparision'
